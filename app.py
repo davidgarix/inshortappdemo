@@ -1,6 +1,5 @@
-#Coded by Sumanjay on 29th Feb 2020
 from flask import Flask, request, jsonify
-from inshorts import getNews
+from inshorts import getNews, get_categories
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
@@ -14,6 +13,10 @@ import time
 
 # Load environment variables
 load_dotenv()
+
+# Configure default limits
+DEFAULT_NEWS_LIMIT = int(os.getenv('DEFAULT_NEWS_LIMIT', 30))
+MAX_NEWS_LIMIT = int(os.getenv('MAX_NEWS_LIMIT', 100))
 
 # Configure logging
 def setup_logging():
@@ -62,7 +65,7 @@ class NewsAPIError(Exception):
 
 class CategoryNotFoundError(NewsAPIError):
     """Raised when category is missing or invalid"""
-    def __init__(self, message="Category parameter is required"):
+    def __init__(self, message="Category parameter is required or is invalid"):
         super().__init__(message, status_code=404)
 
 # Error handler decorator
@@ -113,19 +116,48 @@ def home():
 def news():
     if request.method == 'GET':
         category = request.args.get("category")
+        
+        # Get limit from query params with default value
+        try:
+            limit = int(request.args.get("limit", DEFAULT_NEWS_LIMIT))
+            if limit < 1:
+                limit = 1
+            elif limit > MAX_NEWS_LIMIT:
+                limit = MAX_NEWS_LIMIT
+        except ValueError:
+            limit = DEFAULT_NEWS_LIMIT
+            
         if not category:
             raise CategoryNotFoundError()
         
         try:
-            news_data = getNews(category)
-            logger.info(f"Successfully fetched news for category: {category}")
-            return jsonify({
-                "status": "success",
-                "data": news_data
-            }), 200
+            news_data = getNews(category, limit)
+            logger.info(f"Successfully fetched news for category: {category} with limit: {limit}")
+            return jsonify(news_data), 200
         except Exception as e:
             logger.error(f"Error fetching news for category {category}: {str(e)}")
             raise NewsAPIError(f"Failed to fetch news for category: {category}")
+
+@app.route('/categories')
+@handle_errors
+def get_available_categories():
+    """Get all available news categories"""
+    try:
+        categories_data = get_categories()
+        
+        if categories_data['success']:
+            logger.info("Successfully fetched dynamic categories")
+        else:
+            logger.warning("Using fallback categories")
+            
+        return jsonify({
+            "status": "success",
+            "data": categories_data['categories']
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error fetching categories: {str(e)}")
+        raise NewsAPIError("Failed to fetch categories")
 
 # Error handlers for common HTTP errors
 @app.errorhandler(404)
