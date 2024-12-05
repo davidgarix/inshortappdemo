@@ -20,6 +20,11 @@ MAX_NEWS_LIMIT = int(os.getenv('MAX_NEWS_LIMIT', 100))
 
 # Configure logging
 def setup_logging():
+    """
+    Configures rotating file logging system with separate files for:
+    - app.log: All application logs (10MB max, 10 backups)
+    - error.log: Error-specific logs
+    """
     log_dir = 'logs'
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -57,7 +62,10 @@ logger = setup_logging()
 
 # Custom error classes
 class NewsAPIError(Exception):
-    """Base exception for News API errors"""
+    """
+    Base exception for API-specific errors
+    Provides consistent error response structure with status codes
+    """
     def __init__(self, message, status_code=500):
         self.message = message
         self.status_code = status_code
@@ -114,6 +122,13 @@ def home():
 @app.route('/news')
 @handle_errors
 def news():
+    """
+    Main endpoint to fetch news articles
+    GET params:
+        - category: News category (required)
+        - limit: Number of articles (optional, default=30, max=100)
+    Returns JSON with news articles or error message
+    """
     if request.method == 'GET':
         category = request.args.get("category")
         
@@ -141,7 +156,10 @@ def news():
 @app.route('/categories')
 @handle_errors
 def get_available_categories():
-    """Get all available news categories"""
+    """
+    Returns list of all available news categories
+    Falls back to predefined categories if dynamic fetch fails
+    """
     try:
         categories_data = get_categories()
         
