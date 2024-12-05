@@ -3,7 +3,9 @@ import datetime
 import uuid
 import requests
 import pytz
+import logging
 
+logger = logging.getLogger(__name__)
 
 headers = {
     'authority': 'inshorts.com',
@@ -23,7 +25,7 @@ headers = {
 
 params = (
     ('category', 'top_stories'),
-    ('max_limit', '10'),
+    ('max_limit', '30'),
     ('include_card_data', 'true')
 )
 
@@ -35,10 +37,14 @@ def getNews(category):
     else:
         response = requests.get(
             f'https://inshorts.com/api/en/search/trending_topics/{category}', headers=headers, params=params)
+    
+    # Log the full response for debugging
+    logger.debug(f"API Response: {response.text}")
+
     try:
         news_data = response.json()['data']['news_list']
     except Exception as e:
-        print(response.text)
+        logger.error(f"Error parsing response: {str(e)}")
         news_data = None
 
     newsDictionary = {
