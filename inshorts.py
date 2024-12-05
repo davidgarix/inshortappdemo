@@ -11,6 +11,8 @@ from flask import Flask, request, jsonify
 
 logger = logging.getLogger(__name__)
 
+# Core service for fetching and processing news from Inshorts
+# Handles API interactions, data transformation, and caching
 CATEGORIES = [
     'all',
     'india',
@@ -60,10 +62,17 @@ def handle_errors(func):
 
 def getNews(category, limit=30):
     """
-    Fetch news from Inshorts API with pagination support
+    Fetches and processes news articles from Inshorts
+    
     Args:
-        category (str): News category
-        limit (int): Number of news items to return (default: 30)
+        category: News category to fetch
+        limit: Maximum number of articles to return
+    
+    Returns:
+        Dictionary containing:
+        - success: Boolean indicating success/failure
+        - category: Requested category
+        - data: List of processed news articles
     """
     category = category.lower()
     if category != 'all' and category not in CATEGORIES:
@@ -165,7 +174,14 @@ def getNews(category, limit=30):
         return newsDictionary
 
 def create_news_object(news):
-    """Create a standardized news object"""
+    """
+    Transforms raw API response into standardized news format
+    
+    Handles:
+    - Timezone conversion (UTC to IST)
+    - Unique ID generation
+    - Data structure normalization
+    """
     timestamp = news['created_at'] / 1000
     dt_utc = datetime.datetime.utcfromtimestamp(timestamp)
     tz_utc = pytz.timezone('UTC')
@@ -209,6 +225,11 @@ def home():
 
 @app.route('/start-task')
 def start_task():
+    """
+    WebSocket endpoint for long-running tasks
+    Emits progress events (0-100) to connected clients
+    Handles task completion and error notifications
+    """
     def background_task():
         try:
             for i in range(100):
