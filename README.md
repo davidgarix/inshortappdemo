@@ -1,29 +1,52 @@
-# Inshorts News API [Unofficial]
+# Inshorts News API
 
----
+A robust Flask-based REST API that provides programmatic access to news articles from Inshorts. This unofficial API allows developers to fetch categorized news content with features like pagination, rate limiting, and real-time updates.
 
-This API is capable of fetching news contents from various sources as gathered by Inshorts app.
+## Features
 
----
+- **Category-based News Retrieval**: Access news from 13+ categories including technology, sports, business, etc.
+- **Pagination Support**: Control the number of news items with customizable limits
+- **Real-time Updates**: WebSocket integration for live progress tracking
+- **Error Handling**: Comprehensive error handling with detailed logging
+- **CORS Support**: Cross-Origin Resource Sharing enabled for web applications
+- **Rate Limiting**: Built-in protection against API abuse
+- **Deployment Ready**: Configured for Heroku, Vercel, and Deta platforms
 
-### Show some :heart: and :star: the repo to support the project
+## API Endpoints
 
-[![GitHub stars](https://img.shields.io/github/stars/cyberboysumanjay/inshorts-news-api.svg?style=social&label=Star)](https://github.com/cyberboysumanjay/Inshorts-News-API)
+### 1. Get News by Category
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/cyberboysj.svg?style=social)](https://twitter.com/CyberboySj)
+```
+https://inshorts.deta.dev/news?category={category_name}&limit={number}
+```
 
-![GitHub followers](https://img.shields.io/github/followers/cyberboysumanjay.svg?style=social&label=Follow)
+Parameters:
+- `category` (required): News category (see categories list below)
+- `limit` (optional): Number of news items (default: 30, max: 100)
 
-[![Telegram Channel](https://img.shields.io/badge/Telegram-Channel-orange)](https://t.me/sjprojects)
+Example:
 
----
+```bash
+curl https://inshorts.deta.dev/news?category=technology&limit=10
+```
 
-## News Categories
+### 2. Get Available Categories
 
-This API supports category wise news. Here is a complete list of all categories.
+```http
+GET /categories
+```
 
-1. all
-2. national //Indian News only
+### 3. WebSocket Progress Tracking
+
+```http
+GET /start-task
+```
+Emits real-time progress updates through WebSocket connection.
+
+## Available Categories
+
+1. all (aggregate news)
+2. national (Indian news)
 3. business
 4. sports
 5. world
@@ -32,93 +55,127 @@ This API supports category wise news. Here is a complete list of all categories.
 8. startup
 9. entertainment
 10. miscellaneous
-11. hatke
+11. hatke (unusual news)
 12. science
 13. automobile
 
----
-
-## Usage
-
-Make a get request specifying the category of news you want
-
-```
-https://inshorts.deta.dev/news?category={category_name}
-```
-
-Example - https://inshorts.deta.dev/news?category=science
-
----
-
 ## Response Format
 
-The response JSON Object looks something like this -
-
-```JSON
+```json
 {
   "category": "technology",
   "data": [
     {
-      "author": "Pragya Swastik",
-      "content": "American actor Aaron Paul, who portrayed Jesse Pinkman in 'Breaking Bad', revealed that he uses a 'credit card-sized dumb phone' that cannot store any apps and can only make calls and send texts. \"There's no camera or emailing,\" Paul said, adding that he's planning to buy a flip phone. \"I haven't owned a computer in over 10 years,\" he added.",
-      "date": "15 Mar 2020,Sunday",
-      "imageUrl": "https://static.getinpix.com/public/images/v1/variants/jpg/m/2020/03_mar/15_sun/img_1584273701082_423.jpg",
-      "readMoreUrl": "https://www.dailymail.co.uk/tvshowbiz/article-8111761/Breaking-Bad-star-Aaron-Paul-reveals-owned-computer-decade-prefers-FLIP-PHONE.html?utm_campaign=fullarticle&utm_medium=referral&utm_source=inshorts ",
-      "time": "06:17 pm",
-      "title": "\nI use a 'dumb phone' that only makes calls & sends texts: 'Breaking Bad' actor\n",
-      "url": "https://www.inshorts.com/en/news/i-use-a-dumb-phone-that-only-makes-calls-sends-texts-breaking-bad-actor-1584276455594"
-    },
-    {
-      "author": "Pragya Swastik",
-      "content": "Google recently shared five basic protective measures against coronavirus that can be followed by people worldwide. These include washing hands often, coughing into the elbow, not touching the face, staying over three feet apart from others and staying at home on feeling sick. Google engineers are also building a website to screen potential coronavirus patients in the US.",
-      "date": "16 Mar 2020,Monday",
-      "imageUrl": "https://static.getinpix.com/public/images/v1/variants/jpg/m/2020/03_mar/15_sun/img_1584292734587_739.jpg",
-      "readMoreUrl": "https://twitter.com/Google/status/1238893403821113344?s=20&utm_campaign=fullarticle&utm_medium=referral&utm_source=inshorts ",
+      "id": "unique-uuid",
+      "title": "News Title",
+      "imageUrl": "https://image.url",
+      "url": "https://news.url",
+      "content": "News content text",
+      "author": "Author Name",
+      "date": "Monday, 16 March, 2024",
       "time": "07:00 am",
-      "title": "\nGoogle shares 5 basic protective measures against coronavirus\n",
-      "url": "https://www.inshorts.com/en/news/google-shares-5-basic-protective-measures-against-coronavirus-1584322241969"
+      "readMoreUrl": "https://source.url"
     }
-    ],
+  ],
   "success": true
 }
 ```
 
+## Setup and Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/inshorts-news-api.git
+cd inshorts-news-api
+```
+
+2. Set up virtual environment:
+
+```bash
+./setup_venv.sh
+```
+
+3. Install dependencies:
+
+```bash
+./dependencies.sh
+```
+
+4. Configure environment variables:
+Create a `.env` file with:
+
+```env
+FLASK_ENV=development
+FLASK_PORT=5001
+FLASK_SECRET_KEY=your-secret-key
+DEFAULT_NEWS_LIMIT=30
+MAX_NEWS_LIMIT=100
+```
+
+5. Run the application:
+
+```bash
+python app.py
+```
+
+## Deployment
+
+### Heroku
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+### Vercel
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/yourusername/Inshorts-News-API)
+
+## Error Handling
+
+The API implements comprehensive error handling:
+
+- 404: Resource not found
+- 405: Method not allowed
+- 500: Internal server error
+
+All errors return JSON responses with error details:
+
+```json
+{
+  "error": "Error message",
+  "status": "error"
+}
+```
+
+## Logging
+
+The application implements rotating file logging:
+- Application logs: `logs/app.log`
+- Error logs: `logs/error.log`
+
+## Rate Limiting and Security
+
+- Built-in rate limiting to prevent abuse
+- CORS protection
+- Request logging and monitoring
+- Secure headers implementation
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built with Flask and Python 3.7+
+- Powered by Inshorts content
+- Special thanks to all contributors
+
 ---
 
-## Setup
-
-Install all dependencies listed in _requirements.txt_ file.
-
-1. To install all dependencies run -
-
-   ```bash
-   $ sudo -H pip3 install -r requirements.txt
-   ```
-
-2. Start the server
-
-   ```bash
-   $ python app.py
-   ```
-
----
-
-## Apps using this API
-
-#### [Telegram Channel](https://telegram.dog/inshortschannel) of Inshorts News
-
-## [![Telegram Channel](https://img.shields.io/endpoint?color=neon&style=flat-square&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Finshortschannel)](https://telegram.dog/inshortschannel)
-
-### You can fork the repo and deploy on VPS, Heroku or Vercel :)
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/cyberboysumanjay/Inshorts-News-API/tree/master)
-
-[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/cyberboysumanjay/Inshorts-News-API/tree/master)
-
----
-
-#### :star: the Repo in case you liked it :)
-
-#### Made with :heart: in India
-
-# © [Sumanjay](https://cyberboysumanjay.github.io)
+Made with ❤️ by dinesh sundaram
+reference - https://github.com/cyberboysumanjay/Inshorts-News-API 
